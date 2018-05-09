@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block menu_index %}
+class="active"
+{% endblock %}
+
+{% block custom_css %}
+    <style type="text/css">
+    .main{
+        position:absolute;
+        top:50%;
+        left:50%;
+        width:400px;
+        height:500px;
+        margin-top:-250px;
+        margin-left:-200px;
+        {#border:1px solid red;#}
+        line-height:30px;
+        font-size:16px;
+        text-align:center;
+        background-color:#E3E3E3;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <section>
+        <div class="wp butler_list_box list">
+            <div class='left'>
+                {% for country in countrys %}
+                <div class="layout" style="margin:15px; margin-top: 50px; border:0;padding:0;">
+                <form id="{{ country.countryid }}_form">
+                {% csrf_token %}
+                    <div class="head">
+                        <ul class="tab_header">
+                            <input type="hidden" name="countryid" id="DeleteCountryId" value="{{ country.countryid }}">
+                            <li><label>地区：</label><a href="{% url '[equipments]:room_detail' %}?countryid={{ country.countryid }}" style="font-size: 20px; color: #00B23B">{{ country.name }}</a></li>
+                            <li><label>查看机房：</label></li>
+                            {% for room in rooms %}
+                                {% if room.country_id == country.countryid %}
+                                    <li><a href="{% url '[equipments]:room_detail' %}?countryid={{ country.countryid }}">{{ room.name }}</a></li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <textarea name="remark" id="{{ country.countryid }}_remark" rows="20" cols="90" placeholder="备注:">{% if country.remark %}{{ country.remark }}{% endif %}</textarea>
+                    <input id="DetailCountryBtn" type="button" onclick="show('{{ country.countryid }}','{{ country.name }}','{{ country.countryid }}_remark')" style="width: 100px; height: 50px;"
+                       value="编&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;辑"/>
+                    <input id="DeleteCountryBtn" type="button" onclick="DeleteCountry('{{ country.countryid }}_form')" style="width: 100px; height: 50px;"
+                       value="删&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;除"/>
+                </form>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="right companyright" >
+                <div class="head">添加地区</div>
+                <form class="rightform" id="AddCountryForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="countryid" id="AddCountryId" value="{{ new_countryid }}">
+                    <div style="margin-top: 10px; border:0;padding:0;">
+                        <input type="text" style="width: 215px" name="name" id="AddCountryName" placeholder="地区名称" maxlength="30"/>
+                    </div>
+                    <div style="margin-top: 20px; border:0;padding:0;">
+                        <textarea rows="10" cols="33" name="remark" id="AddCountryRemark" placeholder="备注:" data-value=""></textarea>
+                    </div>
+                    <div style="margin-top: 110px; border:0;padding:0;">
+                        <input style="width: 215px; height: 40px; color: #fff; background-color: #00B23B" type="button" id="AddCountryBtn" onclick="CommitCountry('AddCountryForm')" value="提&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;交"/>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {# 修改地区Div #}
+        <div class="main" id="main" hidden="hidden">
+            <div class="head">修改地区</div>
+                <form class="detailform" id="DetailCountryForm">
+                    {% csrf_token %}
+                    <div style="margin-top: 10px; border:0;padding:0;">
+                        <label>地区名称：</label>
+                        <input type="hidden" name="countryid" id="DetailCountryId" value="">
+                        <input name="name" id="DetailCountryName" type="text" style="width: 215px"  maxlength="30" value=""/>
+                    </div>
+                    <div style="margin-top: 20px; border:0;padding:0;">
+                        <textarea rows="20" cols="45" name="remark" id="DetailCountryRemark" placeholder="备注:" data-value=""></textarea>
+                    </div>
+                    <div style="margin-top: 10px; border:0;padding:0;">
+                        <input style="width: 150px; height: 40px; color: #fff; background-color: #00B23B" type="button" id="CommitCountryBtn" onclick="CommitCountry('DetailCountryForm')" value="提&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;交"/>
+                        <input style="width: 150px; height: 40px; color: #fff; background-color: #00B23B" type="button" id="CancelCountryBtn" onclick="hide()" value="取&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;消"/>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block custom_js %}
+    {# 显示和隐藏编辑窗口 #}
+    <script type="text/javascript">
+        function show(countryid, name, remark) {
+            document.getElementById("DetailCountryId").value=countryid;
+            document.getElementById("DetailCountryName").value=name;
+            document.getElementById("DetailCountryRemark").value=document.getElementById(remark).value;
+
+            var hy = (document.documentElement.scrollTop || document.body.scrollTop) + 260;
+            document.getElementById("main").style.top = hy + 'px';
+            document.getElementById("main").style.display='inline';
+        }
+        {# 清空内容，并隐藏 #}
+        function hide() {
+            document.getElementById("main").style.display='none';
+        }
+    </script>
+
+    {# 添加地区 #}
+    <script>
+    function CommitCountry(form) {
+        $.ajax({
+                cache:false,
+                type:'POST',
+                url:"{% url '[equipments]:country_detail' %}",
+                data:$('#'+form).serialize(),
+                async:true,
+                success: function (data) {
+                    console.log(data)
+                    if(data.status == 'success'){
+                        alert('提交成功'),
+                        window.location.href="{% url 'index' %}"
+                    }else{
+                        alert('提交失败')
+                    }
+                }
+            })
+    }
+    </script>
+
+    {# 删除地区 #}
+    <script>
+    function DeleteCountry(form) {
+        $.ajax({
+                cache:false,
+                type:'POST',
+                url:"{% url '[equipments]:country_delete' %}",
+                data:$('#'+form).serialize(),
+                async:true,
+                success: function (data) {
+                    console.log(data)
+                    if(data.status == 'success'){
+                        alert('提交成功'),
+                        window.location.href="{% url 'index' %}"
+                    }else{
+                        alert(data.msg)
+                    }
+                }
+            })
+    }
+    </script>
+{% endblock %}

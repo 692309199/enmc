@@ -1,0 +1,324 @@
+{% extends 'equipments_base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+    <section>
+        <div class="wp butler_list_box list">
+            {# 上部 #}
+            <div class="listoptions">
+                <ul>
+                    <li>
+                        <h2>所在地区</h2>
+                        <div class="more">更多</div>
+                        <div class="cont">
+                            <a href="?status={{ status_id }}&type={{ equipment_type_id }}&cabinet={{ cabinet_id }}&room={{ room_id }}"><span
+                                    class="{% ifequal country_id '' %}
+                                    active2
+                                {% endifequal %}
+                                ">全部</span></a>
+
+                            {% for country in countrys %}
+                                <a href="?status={{ status_id }}&type={{ equipment_type_id }}&cabinet={{ cabinet_id }}&room={{ room_id }}&country={{ country.countryid }}"><span
+                                        class="{% ifequal country_id country.countryid %}
+                                                      active2
+                                        {% endifequal %}
+                                ">{{ country.name }}</span></a>
+                            {% endfor %}
+                        </div>
+                    </li>
+                    <li>
+                        <h2>所属机房</h2>
+                        <div class="more">更多</div>
+                        <div class="cont">
+                            <a href="?status={{ status_id }}&type={{ equipment_type_id }}&cabinet={{ cabinet_id }}&country={{ country_id }}"><span
+                                    class="{% ifequal room_id '' %}
+                                    active2
+                                {% endifequal %}
+                                ">全部</span></a>
+                            {% for room in rooms %}
+                                <a href="?status={{ status_id }}&type={{ equipment_type_id }}&cabinet={{ cabinet_id }}&room={{ room.roomid }}&country={{ country_id }}"><span
+                                        class="{% ifequal room_id room.roomid %}
+                                                      active2
+                                        {% endifequal %}
+                                ">{{ room.name }}</span></a>
+                            {% endfor %}
+                        </div>
+                    </li>
+                    <li>
+                        <h2>所属机柜</h2>
+                        <div class="more">更多</div>
+                        <div class="cont">
+                            <a href="?status={{ status_id }}&type={{ equipment_type_id }}&room={{ room_id }}&&country={{ country_id }}"><span
+                                    class="{% ifequal cabinet_id '' %}
+                                    active2
+                                {% endifequal %}
+                                ">全部</span></a>
+                            {% for cabinet in cabinets %}
+                                <a href="?status={{ status_id }}&type={{ equipment_type_id }}&cabinet={{ cabinet.cabinetid }}&room={{ room_id }}&country={{ country_id }}"><span
+                                        class="{% ifequal cabinet_id cabinet.cabinetid %}
+                                                      active2
+                                        {% endifequal %}
+                                ">{{ cabinet.name }}</span></a>
+                            {% endfor %}
+                        </div>
+                    </li>
+                    <li>
+                        <h2>设备类型</h2>
+                        <div class="more">更多</div>
+                        <div id="cont" class="cont">
+                            <a href="?status={{ status_id }}&cabinet={{ cabinet_id }}&room={{ room_id }}&&country={{ country_id }}"><span
+                                    class="{% ifequal equipment_type_id '' %}
+                                    active2
+                                {% endifequal %}
+                                ">全部</span></a>
+                            {% for equipment_type in equipment_types %}
+                                <a href="?status={{ status_id }}&type={{ equipment_type.equipment_typeid }}&cabinet={{ cabinet_id }}&room={{ room_id }}&country={{ country_id }}"><span
+                                        class="{% ifequal equipment_type_id equipment_type.equipment_typeid %}
+                                                      active2
+                                        {% endifequal %}
+                                ">{{ equipment_type.name }}</span></a>
+                            {% endfor %}
+                        </div>
+                    </li>
+                    <li>
+                        <h2>设备状态</h2>
+                        <div class="more">更多</div>
+                        <div class="cont">
+                            <a href="?type={{ equipment_type_id }}&cabinet={{ cabinet_id }}&room={{ room_id }}&&country={{ country_id }}"><span
+                                    class="{% ifequal status_id '' %}
+                                    active2
+                                {% endifequal %}
+                                ">全部</span></a>
+                            {% for status in statuses %}
+                                <a href="?status={{ status.id }}&type={{ equipment_type_id }}&cabinet={{ cabinet_id }}&room={{ room_id }}&country={{ country_id }}"><span
+                                        class="{% ifequal status_id status.id|stringformat:'i' %}
+                                                      active2
+                                        {% endifequal %}
+                                ">{{ status.get_status_display }}</span></a>
+                            {% endfor %}
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            {# 中间 #}
+            <div class="all">
+                <form action="{% url '[equipments]:service_detail' %}" method="post" autocomplete="off">
+                {% csrf_token %}
+
+                    <label>地区：</label>
+                    <select id="country_select" style="width: 150px; height: 38px">
+                        <option value="kong">请选择</option>
+                        {% for country in countrys %}
+                            <option value="{{ country.countryid }}">{{ country.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <a href="JavaScript:void(0);" onclick="country(this)"><span style="font-size:15px; color: #00ad29">&nbsp;&nbsp;查看地区&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></a>
+
+                    <label>机房：</label>
+                    <select id="room_select" style="width: 150px; height: 38px">
+                    </select>
+                    <a href="JavaScript:void(0);" onclick="country(this)"><span style="font-size:15px; color: #00ad29">&nbsp;&nbsp;查看机房&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></a>
+
+                    <label>机柜：</label>
+                    <select id="cabinet_select" style="width: 150px; height: 38px">
+                    </select>
+                    <a href="JavaScript:void(0);" onclick="country(this)"><span style="font-size:15px; color: #00ad29">&nbsp;&nbsp;查看机柜&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></a>
+
+                共&nbsp;&nbsp;{{ equipment_num }}<span class="key"></span>&nbsp;&nbsp;个&nbsp;&nbsp;
+{#                <a class="key" href="{% url '[equipments]:equipment_detail' %}?todo=add">添加设备</a>#}
+                <input class="btn btn-green" id="jsAddBtn" type="button" style="width: 100px; height: 40px; background: #cc3333"
+                       value="添加设备"/>
+                </form>
+            </div>
+
+            {# 列表部分 #}
+            <div class="butler_list company list" style="width: 1198px; margin-top: 30px">
+                <div class="layout">
+                    <div class="head">
+                        <ul class="tab_header">
+                            <div class="right" style="width: 190px">
+                                <li class=""><a
+                                        href="?status={{ status_id }}&type={{ equipment_type_id }}&cabinet={{ cabinet_id }}&room={{ room_id }}&country={{ country_id }}"></a>
+                                </li>
+                            </div>
+                            <div class="right" style="width: 120px">
+                                <li class="{% ifequal sort 'port' %}
+                                     active
+                                {% endifequal %}"><a
+                                        href="?status={{ status_id }}&type={{ equipment_type_id }}&cabinet={{ cabinet_id }}&room={{ room_id }}&country={{ country_id }}&sort=port">远程端口
+                                    &#8595;</a></li>
+                            </div>
+                            <div class="right" style="width: 120px">
+                                <li class="{% ifequal sort 'disk' %}
+                                     active
+                                {% endifequal %}"><a
+                                        href="?status={{ status_id }}&type={{ equipment_type_id }}&cabinet={{ cabinet_id }}&room={{ room_id }}&country={{ country_id }}&sort=disk">磁盘 (G)
+                                    &#8595;</a></li>
+                            </div>
+                            <div class="right" style="width: 120px">
+                                <li class="{% ifequal sort 'memory' %}
+                                     active
+                                {% endifequal %}"><a
+                                        href="?status={{ status_id }}&type={{ equipment_type_id }}&cabinet={{ cabinet_id }}&room={{ room_id }}&country={{ country_id }}&sort=memory">内存 (G)
+                                    &#8595;</a></li>
+                            </div>
+                            <div class="right" style="width: 120px">
+                                <li class="{% ifequal sort 'cpu' %}
+                                     active
+                                {% endifequal %}"><a
+                                        href="?status={{ status_id }}&type={{ equipment_type_id }}&cabinet={{ cabinet_id }}&room={{ room_id }}&country={{ country_id }}&sort=cpu">CPU (核)
+                                    &#8595;</a></li>
+                            </div>
+                            <div class="right" style="width: 120px">
+                                <li class="{% ifequal sort 'hostname' %}
+                                     active
+                                {% endifequal %}"><a
+                                        href="?status={{ status_id }}&type={{ equipment_type_id }}&cabinet={{ cabinet_id }}&room={{ room_id }}&country={{ country_id }}&sort=hostname">主机名
+                                    &#8595;</a></li>
+                            </div>
+                            <div class="right" style="width: 120px">
+                                <li class="{% ifequal sort 'hostname' %}
+                                     active
+                                {% endifequal %}"><a
+                                        href="?status={{ status_id }}&type={{ equipment_type_id }}&cabinet={{ cabinet_id }}&room={{ room_id }}&country={{ country_id }}&sort=type">设备类型
+                                    &#8595;</a></li>
+                            </div>
+                            <div class="right" style="width: 120px">
+                                <li class="{% ifequal sort 'ip' %}
+                                     active
+                                {% endifequal %}"><a
+                                        href="?status={{ status_id }}&type={{ equipment_type_id }}&cabinet={{ cabinet_id }}&room={{ room_id }}&country={{ country_id }}&sort=ip">IP地址
+                                    &#8595;</a></li>
+                            </div>
+                        </ul>
+                    </div>
+
+                    {% for equipment in equipments.object_list %}
+                        <dl class="des difdes" style="height: 10px; width: 1155px">
+                            <div class="right" style="width: 125px">
+                                <a href="{% url '[equipments]:equipment_detail' %}?equipmentid={{ equipment.equipmentid }}"><span
+                                        style="font-size:15px; color: #00ad29">查看详情</span></a>
+                            </div>
+                            <div class="right" style="width: 125px">
+                                <span style="font-size:15px; color: #1D1F21">{% if equipment.ssh_port %}{{ equipment.ssh_port }}{% endif %}</span>
+                            </div>
+                            <div class="right" style="width: 125px">
+                                <span style="font-size:15px; color: #1D1F21">{% if equipment.disk %}{{ equipment.disk }}{% endif %}</span>
+                            </div>
+                            <div class="right" style="width: 125px">
+                                <span style="font-size:15px; color: #1D1F21">{% if equipment.memory %}{{ equipment.memory }}{% endif %}</span>
+                            </div>
+                            <div class="right" style="width: 125px">
+                                <span style="font-size:15px; color: #1D1F21">{% if equipment.cpu %}{{ equipment.cpu }}{% endif %}</span>
+                            </div>
+                            <div class="right" style="width: 125px">
+                                <span style="font-size:15px; color: #1D1F21">{% if equipment.hostname %}{{ equipment.hostname }}{% endif %}</span>
+                            </div>
+                            <div class="right" style="width: 125px">
+                                <span style="font-size:15px; color: #1D1F21">{% if equipment.equipment_type %}{{ equipment.equipment_type }}{% endif %}</span>
+                            </div>
+                            <div class="right" style="width: 125px">
+                                <a href="{% url '[equipments]:equipment_detail' %}?equipmentid={{ equipment.equipmentid }}"><span
+                                        style="font-size:15px; color: #1D1F21">{% if equipment.ip %}{{ equipment.ip }}{% endif %}</span></a>
+                            </div>
+                        </dl>
+                    {% endfor %}
+                </div>
+
+                <div class="pageturn">
+                    <ul class="pagelist">
+                        {#                            {{ users.render }}#}
+                        {% if equipments.has_previous %}
+                            <li class="long">
+                                <a href="?{{ equipments.previous_page_number.querystring }}">上一页</a>
+                            </li>
+                        {% endif %}
+
+                        {% for page in equipments.pages %}
+                            {% if page %}
+                                {% ifequal page equipments.number %}
+                                    <li class="active"><a
+                                            href="?{{ page.querystring }}">{{ page }}</a></li>
+                                {% else %}
+                                    <li><a href="?{{ page.querystring }}"
+                                           class="page">{{ page }}</a></li>
+                                {% endifequal %}
+                            {% else %}
+                                <li class="none"><a href="">...</a></li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if equipments.has_next %}
+                            <li class="long"><a href="?{{ equipments.next_page_number.querystring }}">下一页</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block custom_js %}
+    <script language="javascript" type="text/javascript">
+        $(document).ready(function(){
+        $('#country_select').change(function(){
+            {#alert($(this).children('option:selected').val());#}
+            var country=$(this).children('option:selected').val();//这就是selected的值
+            if(country=='kong'){
+                var content='';
+                $('#room_select').html(content)
+                $('#cabinet_select').html(content)
+            }else{
+                $.getJSON("{% url '[equipments]:equipment_getdata' %}?country=" + country, function(data,textStatus){
+                var content='<option value="kong">请选择</option>';
+                $.each(data, function(i, room){
+                        content+='<option value='+room.pk+'>'+room.fields.name+'</option>'
+                });
+                $('#room_select').html(content)
+            })
+            }
+        })
+        })
+    </script>
+
+    <script language="javascript" type="text/javascript">
+        $(document).ready(function(){
+        $('#room_select').change(function(){
+            {#alert($(this).children('option:selected').val());#}
+            var room=$(this).children('option:selected').val();//这就是selected的值
+            if(room=='kong'){
+                var content='';
+                $('#cabinet_select').html(content)
+            }else{
+                $.getJSON("{% url '[equipments]:equipment_getdata' %}?room=" + room, function(data,textStatus){
+                var content='<option value="kong">请选择</option>';
+                $.each(data, function(i, cabinet){
+                        content+='<option value='+cabinet.pk+'>'+cabinet.fields.name+'</option>'
+                });
+                $('#cabinet_select').html(content)
+            })
+            }
+        })
+        })
+    </script>
+
+    <script>
+    $(function () {
+        $('#jsAddBtn').on('click',function () {
+            var country = document.getElementById("country_select").value;
+            var room = document.getElementById("room_select").value;
+            var cabinet = document.getElementById("cabinet_select").value;
+            if(cabinet=='kong') {
+                alert('请选择要添加到哪个机柜');
+            }else if(cabinet.length<1){
+                alert('请选择要添加到哪个机房');
+            }else {
+                var url = "{% url '[equipments]:equipment_detail' %}" + '?country=' + country + '&room=' + room + '&cabinet=' + cabinet + '&todo=add';
+                window.location.href=url
+            }
+        })
+    })
+    </script>
+{% endblock %}

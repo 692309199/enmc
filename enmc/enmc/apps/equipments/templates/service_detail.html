@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <title>网管系统</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/reset.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/login.css">
+</head>
+<body>
+<header>
+</header>
+<section>
+    <div class="fl form-box" style="width: 550px; margin-top: -80px">
+        <h2>编辑服务</h2>
+        <form action="{% url '[equipments]:service_detail' %}" method="post" autocomplete="off">
+            {% csrf_token %}
+            <input name="equipmentid" id="equipmentid" type="hidden" value="{{ equipmentid }}">
+            <input name="serviceid" id="serviceid" type="hidden" value="{{ serviceid }}">
+            <div class="form-group marb20" style="width: 550px;">
+                <label>服务名称</label>
+                <input name="name" id="name" type="text" value="{% if service.name %}{{ service.name }}{% endif %}">
+            </div>
+            <div class="form-group marb8" style="width: 550px">
+                <label>安装路径</label>
+                <input name="install" id="install" type="text" value="{% if service.install %}{{ service.install }}{% endif %}">
+            </div>
+            <div class="form-group marb8" style="width: 550px">
+                <label>配置文件</label>
+                <input name="config" id="config" type="text" value="{% if service.config %}{{ service.config }}{% endif %}">
+            </div>
+            <div class="form-group marb8" style="width: 550px">
+                <label>启动文件</label>
+                <input name="start" id="start" type="text" value="{% if service.start %}{{ service.start }}{% endif %}">
+            </div>
+            <div class="form-group marb8" style="width: 550px">
+                <label>软件版本</label>
+                <input name="version" id="version" type="text" value="{% if service.version %}{{ service.version }}{% endif %}">
+            </div>
+            <div class="form-group marb8" style="width: 550px">
+                <label>端口号</label>
+                <input name="port" id="port" type="text" value="{% if service.port %}{{ service.port }}{% endif %}">
+            </div>
+            <div class="form-group marb8" style="width: 550px">
+                <label>网络协议</label>
+                <select name="protocol" style="width: 470px; height: 38px">
+                    {% for protocol in protocols %}
+                        {% if protocol == service.protocol %}
+                            <option value="{{ protocol }}" selected>{{ service.get_protocol_display }}</option>
+                        {% else %}
+                            <option value="{{ protocol }}">{{ protocol.upper }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group marb8" style="width: 550px">
+                <label>管理用户</label>
+                <input name="user" id="user" type="text" value="{% if service.user %}{{ service.user }}{% endif %}">
+            </div>
+            <div class="form-group marb8" style="width: 550px">
+                <label>用户密码</label>
+                <input name="password" id="password" type="text" value="{% if service.password %}{{ service.password }}{% endif %}">
+            </div>
+            <div class="form-group marb8" style="width: 550px">
+                <label>备注</label>
+                <input name="remark" id="remark" type="text" value="{% if service.remark %}{{ service.remark }}{% endif %}">
+            </div>
+            <div class="error btns login-form-tips" id="jsLoginTips">
+                {{ msg }}
+            </div>
+            <input class="btn btn-green" id="xiugaimima" type="submit" value="提交">
+        </form>
+    </div>
+</section>
+{#<script src="/static/js/jquery.min.js" type="text/javascript"></script>#}
+{#<script src="/static/js/unslider.js" type="text/javascript"></script>#}
+{#<script src="/static/js/login.js" type="text/javascript"></script>#}
+</body>
+</html>

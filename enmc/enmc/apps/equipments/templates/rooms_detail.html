@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% block menu_index %}
+class="active"
+{% endblock %}
+
+{% block custom_css %}
+    <style type="text/css">
+    .main{
+        position:absolute;
+        top:50%;
+        left:50%;
+        width:400px;
+        height:500px;
+        margin-top:-250px;
+        margin-left:-200px;
+        {#border:1px solid red;#}
+        line-height:30px;
+        font-size:16px;
+        text-align:center;
+        background-color:#E3E3E3;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <section>
+        <div class="wp butler_list_box list">
+            <div class='left'>
+                {% for room in rooms %}
+                <div class="layout" style="margin:15px; margin-top: 50px; border:0;padding:0;">
+                <form id="{{ room.roomid }}_form">
+                {% csrf_token %}
+                    <div class="head">
+                        <ul class="tab_header">
+                            <input type="hidden" name="roomid" id="DeleteRoomId" value="{{ room.roomid }}">
+                            <li><label>机房：</label><a href="{% url '[equipments]:cabinet_detail' %}?countryid={{ countryid }}&roomid={{ room.roomid }}" style="font-size: 20px; color: #00B23B">{{ room.name }}</a></li>
+                            <li><label>机柜：</label></li>
+                            {% for cabinet in cabinets %}
+                                {% if cabinet.room_id == room.roomid %}
+                                    <li><a href="{% url '[equipments]:cabinet_detail' %}?countryid={{ countryid }}&roomid={{ room.roomid }}">{{ cabinet.name }}</a></li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <textarea name="remark" id="{{ room.roomid }}_remark" rows="20" cols="90" placeholder="备注:">{% if room.remark %}{{ room.remark }}{% endif %}</textarea>
+                    <input id="DetailCountryBtn" type="button" onclick="show('{{ room.roomid }}','{{ room.name }}','{{ room.roomid }}_remark')" style="width: 100px; height: 50px;"
+                       value="编&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;辑"/>
+                    <input id="DeleteCountryBtn" type="button" onclick="DeleteRoom('{{ room.roomid }}_form')" style="width: 100px; height: 50px;"
+                       value="删&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;除"/>
+                </form>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="right companyright" >
+                <div class="head">添加机房</div>
+                <form class="rightform" id="AddRoomForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="country" id="AddCountryId" value="{{ countryid }}">
+                    <input type="hidden" name="roomid" id="AddRoomId" value="{{ new_roomid }}">
+                    <div style="margin-top: 10px; border:0;padding:0;">
+                        <input type="text" style="width: 215px" name="name" id="AddRoomName" placeholder="机房名称" maxlength="30"/>
+                    </div>
+                    <div style="margin-top: 20px; border:0;padding:0;">
+                        <textarea rows="10" cols="33" name="remark" id="AddRoomRemark" placeholder="备注:" data-value=""></textarea>
+                    </div>
+                    <div style="margin-top: 110px; border:0;padding:0;">
+                        <input style="width: 215px; height: 40px; color: #fff; background-color: #00B23B" type="button" id="AddRoomBtn" onclick="CommitRoom('AddRoomForm')" value="提&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;交"/>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {# 修改机房Div #}
+        <div class="main" id="main" hidden="hidden">
+            <div class="head">修改机房</div>
+                <form class="detailform" id="DetailRoomForm">
+                    {% csrf_token %}
+                    <div style="margin-top: 10px; border:0;padding:0;">
+                        <label>机房名称：</label>
+                        <input type="hidden" name="country" id="DetailCountryId" value="{{ countryid }}">
+                        <input type="hidden" name="roomid" id="DetailRoomId" value="">
+                        <input name="name" id="DetailRoomName" type="text" style="width: 215px"  maxlength="30" value=""/>
+                    </div>
+                    <div style="margin-top: 20px; border:0;padding:0;">
+                        <textarea rows="20" cols="45" name="remark" id="DetailRoomRemark" placeholder="备注:" data-value=""></textarea>
+                    </div>
+                    <div style="margin-top: 10px; border:0;padding:0;">
+                        <input style="width: 150px; height: 40px; color: #fff; background-color: #00B23B" type="button" id="CommitRoomBtn" onclick="CommitRoom('DetailRoomForm')" value="提&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;交"/>
+                        <input style="width: 150px; height: 40px; color: #fff; background-color: #00B23B" type="button" id="CancelRoomBtn" onclick="hide()" value="取&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;消"/>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block custom_js %}
+    {# 显示和隐藏编辑窗口 #}
+    <script type="text/javascript">
+        function show(roomid, name, remark) {
+            document.getElementById("DetailRoomId").value=roomid;
+            document.getElementById("DetailRoomName").value=name;
+            document.getElementById("DetailRoomRemark").value=document.getElementById(remark).value;
+
+            var hy = (document.documentElement.scrollTop || document.body.scrollTop) + 260;
+            document.getElementById("main").style.top = hy + 'px';
+            document.getElementById("main").style.display='inline';
+        }
+        {# 清空内容，并隐藏 #}
+        function hide() {
+            document.getElementById("main").style.display='none';
+        }
+    </script>
+
+    {# 添加机房 #}
+    <script>
+    function CommitRoom(form) {
+        $.ajax({
+                cache:false,
+                type:'POST',
+                url:"{% url '[equipments]:room_detail' %}",
+                data:$('#'+form).serialize(),
+                async:true,
+                success: function (data) {
+                    console.log(data)
+                    if(data.status == 'success'){
+                        alert('提交成功'),
+                        window.location.href="{% url '[equipments]:room_detail' %}?countryid={{ countryid }}"
+                    }else{
+                        alert('提交失败')
+                    }
+                }
+            })
+    }
+    </script>
+
+    {# 删除机房#}
+    <script>
+    function DeleteRoom(form) {
+        $.ajax({
+                cache:false,
+                type:'POST',
+                url:"{% url '[equipments]:room_delete' %}",
+                data:$('#'+form).serialize(),
+                async:true,
+                success: function (data) {
+                    console.log(data)
+                    if(data.status == 'success'){
+                        alert('提交成功'),
+                        window.location.href="{% url '[equipments]:room_detail' %}?countryid={{ countryid }}"
+                    }else{
+                        alert(data.msg)
+                    }
+                }
+            })
+    }
+    </script>
+{% endblock %}
